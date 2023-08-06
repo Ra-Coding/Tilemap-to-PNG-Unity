@@ -8,33 +8,30 @@ using UnityEditor;
 [CustomEditor(typeof(TilemapToPng))]
 public class TilemapToPngEditor : Editor
 {
-    string nombre = "";
+    string pngName = "";
 
-    public override void OnInspectorGUI ()
+    public override void OnInspectorGUI()
     {
-        TilemapToPng GTM = (TilemapToPng)target;
+        TilemapToPng tilemapToPng = (TilemapToPng)target;
 
-        // DrawDefaultInspector();
-
-        if (GTM.Img == null)
+        if (tilemapToPng.Image == null)
         {
-            if (GUILayout.Button("Create png"))
+            if (GUILayout.Button("Create PNG"))
             {
-                GTM.Pack();
+                tilemapToPng.Pack();
             }
         }
         else
         {
-            GUILayout.Label("File name");
-            nombre = GUILayout.TextField(nombre);
-            if(nombre.Length > 0)
+            GUILayout.Label("File Name");
+            pngName = GUILayout.TextField(pngName);
+            if (pngName.Length > 0)
             {
-                if (GUILayout.Button("Export png"))
+                if (GUILayout.Button("Export PNG"))
                 {
-                    GTM.ExportAsPng(nombre);
+                    tilemapToPng.ExportAsPng(pngName);
                 }
             }
-            
         }
     }
 }
@@ -42,26 +39,25 @@ public class TilemapToPngEditor : Editor
 
 public class TilemapToPng : MonoBehaviour
 {
-
-    Tilemap tm;
-
-    int minX,maxX,minY,maxY;
-    
-    public Texture2D Img;
+    Tilemap tilemap;
+    int minX, maxX, minY, maxY;
+    public Texture2D Image;
 
     public void Pack()
     {
-        tm = GetComponent<Tilemap>();
-        Sprite SpriteCualquiera = null;
+        tilemap = GetComponent<Tilemap>();
+        Sprite anySprite = null;
 
-        for (int x = 0; x < tm.size.x; x++) // Hallamos el punto menor y mayor
+        // Find the minimum and maximum points
+        for (int x = 0; x < tilemap.size.x; x++)
         {
-            for (int y = 0; y < tm.size.y; y++)
+            for (int y = 0; y < tilemap.size.y; y++)
             {
                 Vector3Int pos = new Vector3Int(-x, -y, 0);
-                if (tm.GetSprite(pos) != null)
+                if (tilemap.GetSprite(pos) != null)
                 {
-                    SpriteCualquiera = tm.GetSprite(pos); // seleccionamos un sprite cualquiera para más tarde saber las dimensiones de los sprites
+                    // Select any sprite to determine dimensions later
+                    anySprite = tilemap.GetSprite(pos);
                     if (minX > pos.x)
                     {
                         minX = pos.x;
@@ -73,7 +69,7 @@ public class TilemapToPng : MonoBehaviour
                 }
 
                 pos = new Vector3Int(x, y, 0);
-                if (tm.GetSprite(pos) != null)
+                if (tilemap.GetSprite(pos) != null)
                 {
                     if (maxX < pos.x)
                     {
@@ -87,65 +83,69 @@ public class TilemapToPng : MonoBehaviour
             }
         }
 
-        // Hallamos el tamaño del sprite en pixeles
-        float width = SpriteCualquiera.rect.width;
-        float height = SpriteCualquiera.rect.height;
+        // Determine sprite size in pixels
+        float width = anySprite.rect.width;
+        float height = anySprite.rect.height;
 
-        // creamos una textura con el tamaño multiplicado por el numero de celdas
-        Texture2D ImagenCreada = new Texture2D((int)width * tm.size.x, (int)height * tm.size.y);
+        // Create a texture with size multiplied by the number of cells
+        Texture2D createdImage = new Texture2D((int)width * tilemap.size.x, (int)height * tilemap.size.y);
 
-        // Asignamos toda la imagen invisible
-        Color[] invisible = new Color[ImagenCreada.width * ImagenCreada.height];
-        for (int i = 0; i < invisible.Length; i++)
+        // Assign entire image as invisible
+        Color[] transparent = new Color[createdImage.width * createdImage.height];
+        for (int i = 0; i < transparent.Length; i++)
         {
-            invisible[i] = new Color(0f, 0f, 0f, 0f);
+            transparent[i] = new Color(0f, 0f, 0f, 0f);
         }
-        ImagenCreada.SetPixels(0,0,ImagenCreada.width, ImagenCreada.height, invisible);
-        
-        // Ahora asignamos a cada bloque sus respectivos pixeles
+        createdImage.SetPixels(0, 0, createdImage.width, createdImage.height, transparent);
+
+        // Assign respective pixels to each block
         for (int x = minX; x <= maxX; x++)
         {
-            for(int y = minY; y <= maxY; y++)
+            for (int y = minY; y <= maxY; y++)
             {
-                if (tm.GetSprite(new Vector3Int(x, y, 0)) != null)
+                if (tilemap.GetSprite(new Vector3Int(x, y, 0)) != null)
                 {
-                    // mapeamos los pixeles para que el minX = 0 y minY = 0
-                    ImagenCreada.SetPixels((x - minX) * (int)width, (y - minY) * (int)height, (int)width, (int)height, 
-                        GetCurrentSprite(tm.GetSprite(new Vector3Int(x, y, 0))).GetPixels());
+                    // Map pixels so that minX = 0 and minY = 0
+                    createdImage.SetPixels((x - minX) * (int)width, (y - minY) * (int)height, (int)width, (int)height,
+                        GetCurrentSprite(tilemap.GetSprite(new Vector3Int(x, y, 0))).GetPixels());
                 }
             }
         }
-        ImagenCreada.Apply();
+        createdImage.Apply();
 
-        Img = ImagenCreada; // Almacenamos la textura de la imagen lista
+        // Store the ready image texture
+        Image = createdImage;
     }
 
-    Texture2D GetCurrentSprite(Sprite sprite) // metodo para obtener el sprite recortado tal y como lo ponemos
+    // Method to obtain the cropped sprite as configured
+    Texture2D GetCurrentSprite(Sprite sprite)
     {
         var pixels = sprite.texture.GetPixels((int)sprite.textureRect.x,
                                          (int)sprite.textureRect.y,
                                          (int)sprite.textureRect.width,
                                          (int)sprite.textureRect.height);
-
-        Texture2D textura = new Texture2D((int)sprite.textureRect.width,
+        Texture2D texture = new Texture2D((int)sprite.textureRect.width,
                                          (int)sprite.textureRect.height);
 
-        textura.SetPixels(pixels);
-        textura.Apply();
-        return textura;
+        texture.SetPixels(pixels);
+        texture.Apply();
+
+        return texture;
     }
 
-     public void ExportAsPng(string name) // metodo que exporta como png
-     {
-         byte[] bytes = Img.EncodeToPNG();
-         var dirPath = Application.dataPath + "/Exported Tilemaps/";
-         if (!Directory.Exists(dirPath))
-         {
-             Directory.CreateDirectory(dirPath);
-         }
-         File.WriteAllBytes(dirPath + name + ".png", bytes);
-        AssetDatabase.Refresh();
-        Img = null;
-     }
+    // Method to export as PNG
+    public void ExportAsPng(string name)
+    {
+        byte[] bytes = Image.EncodeToPNG();
+        var dirPath = Application.dataPath + "/Exported Tilemaps/";
 
+        if (!Directory.Exists(dirPath))
+        {
+            Directory.CreateDirectory(dirPath);
+        }
+
+        File.WriteAllBytes(dirPath + name + ".png", bytes);
+        AssetDatabase.Refresh();
+        Image = null;
+    }
 }
