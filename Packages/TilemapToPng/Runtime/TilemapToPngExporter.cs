@@ -1,83 +1,60 @@
-﻿using UnityEngine;
-using UnityEngine.Tilemaps;
 using System.IO;
+using UnityEngine;
+using UnityEngine.Tilemaps;
 
 #if UNITY_EDITOR
 using UnityEditor;
-
-[CustomEditor(typeof(TilemapToPng))]
-public class TilemapToPngEditor : Editor
-{
-    string pngName = "";
-
-    public override void OnInspectorGUI()
-    {
-        TilemapToPng tilemapToPng = (TilemapToPng)target;
-
-        if (tilemapToPng.Image == null)
-        {
-            if (GUILayout.Button("Create PNG"))
-            {
-                tilemapToPng.Pack();
-            }
-        }
-        else
-        {
-            GUILayout.Label("File Name");
-            pngName = GUILayout.TextField(pngName);
-            if (pngName.Length > 0)
-            {
-                if (GUILayout.Button("Export PNG"))
-                {
-                    tilemapToPng.ExportAsPng(pngName);
-                }
-            }
-        }
-    }
-}
 #endif
 
-public class TilemapToPng : MonoBehaviour
+public class TilemapToPngExporter : MonoBehaviour
 {
-    Tilemap tilemap;
-    int minX, maxX, minY, maxY;
-    public Texture2D Image;
+    [SerializeField] private Tilemap _tilemap;
+    [SerializeField] private int _minX, _maxX, _minY, _maxY;
+    private Texture2D _image;
+
+    public Texture2D Image
+    {
+        get
+        {
+            return _image;
+        }
+    }
 
     public void Pack()
     {
-        tilemap = GetComponent<Tilemap>();
+        _tilemap = GetComponent<Tilemap>();
         Sprite anySprite = null;
 
         // Find the minimum and maximum points
-        for (int x = 0; x < tilemap.size.x; x++)
+        for (int x = 0; x < _tilemap.size.x; x++)
         {
-            for (int y = 0; y < tilemap.size.y; y++)
+            for (int y = 0; y < _tilemap.size.y; y++)
             {
-                Vector3Int pos = new Vector3Int(-x, -y, 0);
-                if (tilemap.GetSprite(pos) != null)
+                Vector3Int pos = new(-x, -y, 0);
+                if (_tilemap.GetSprite(pos) != null)
                 {
                     // Select any sprite to determine dimensions later
-                    anySprite = tilemap.GetSprite(pos);
-                    if (minX > pos.x)
+                    anySprite = _tilemap.GetSprite(pos);
+                    if (_minX > pos.x)
                     {
-                        minX = pos.x;
+                        _minX = pos.x;
                     }
-                    if (minY > pos.y)
+                    if (_minY > pos.y)
                     {
-                        minY = pos.y;
+                        _minY = pos.y;
                     }
                 }
 
                 pos = new Vector3Int(x, y, 0);
-                if (tilemap.GetSprite(pos) != null)
+                if (_tilemap.GetSprite(pos) != null)
                 {
-                    if (maxX < pos.x)
+                    if (_maxX < pos.x)
                     {
-                        maxX = pos.x;
+                        _maxX = pos.x;
                     }
-                    if (maxY < pos.y)
+                    if (_maxY < pos.y)
                     {
-                        maxY = pos.y;
+                        _maxY = pos.y;
                     }
                 }
             }
@@ -88,7 +65,7 @@ public class TilemapToPng : MonoBehaviour
         float height = anySprite.rect.height;
 
         // Create a texture with size multiplied by the number of cells
-        Texture2D createdImage = new Texture2D((int)width * tilemap.size.x, (int)height * tilemap.size.y);
+        Texture2D createdImage = new((int)width * _tilemap.size.x, (int)height * _tilemap.size.y);
 
         // Assign entire image as invisible
         Color[] transparent = new Color[createdImage.width * createdImage.height];
@@ -99,22 +76,22 @@ public class TilemapToPng : MonoBehaviour
         createdImage.SetPixels(0, 0, createdImage.width, createdImage.height, transparent);
 
         // Assign respective pixels to each block
-        for (int x = minX; x <= maxX; x++)
+        for (int x = _minX; x <= _maxX; x++)
         {
-            for (int y = minY; y <= maxY; y++)
+            for (int y = _minY; y <= _maxY; y++)
             {
-                if (tilemap.GetSprite(new Vector3Int(x, y, 0)) != null)
+                if (_tilemap.GetSprite(new Vector3Int(x, y, 0)) != null)
                 {
                     // Map pixels so that minX = 0 and minY = 0
-                    createdImage.SetPixels((x - minX) * (int)width, (y - minY) * (int)height, (int)width, (int)height,
-                        GetCurrentSprite(tilemap.GetSprite(new Vector3Int(x, y, 0))).GetPixels());
+                    createdImage.SetPixels((x - _minX) * (int)width, (y - _minY) * (int)height, (int)width, (int)height,
+                        GetCurrentSprite(_tilemap.GetSprite(new Vector3Int(x, y, 0))).GetPixels());
                 }
             }
         }
         createdImage.Apply();
 
         // Store the ready image texture
-        Image = createdImage;
+        _image = createdImage;
     }
 
     // Method to obtain the cropped sprite as configured
@@ -124,7 +101,7 @@ public class TilemapToPng : MonoBehaviour
                                          (int)sprite.textureRect.y,
                                          (int)sprite.textureRect.width,
                                          (int)sprite.textureRect.height);
-        Texture2D texture = new Texture2D((int)sprite.textureRect.width,
+        Texture2D texture = new((int)sprite.textureRect.width,
                                          (int)sprite.textureRect.height);
 
         texture.SetPixels(pixels);
@@ -133,10 +110,11 @@ public class TilemapToPng : MonoBehaviour
         return texture;
     }
 
+#if UNITY_EDITOR
     // Method to export as PNG
     public void ExportAsPng(string name)
     {
-        byte[] bytes = Image.EncodeToPNG();
+        byte[] bytes = _image.EncodeToPNG();
         var dirPath = Application.dataPath + "/Exported Tilemaps/";
 
         if (!Directory.Exists(dirPath))
@@ -146,6 +124,7 @@ public class TilemapToPng : MonoBehaviour
 
         File.WriteAllBytes(dirPath + name + ".png", bytes);
         AssetDatabase.Refresh();
-        Image = null;
+        _image = null;
     }
+#endif
 }

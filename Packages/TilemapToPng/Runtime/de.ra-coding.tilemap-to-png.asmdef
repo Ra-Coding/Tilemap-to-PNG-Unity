@@ -1,0 +1,14 @@
+{
+    "name": "de.ra-coding.tilemap-to-png",
+    "rootNamespace": "RaCoding.TilemapToPng",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

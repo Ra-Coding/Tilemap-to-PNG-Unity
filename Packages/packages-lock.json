@@ -92,6 +92,12 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
+    "de.ra-coding.tilemap-to-png": {
+      "version": "file:TilemapToPng",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
