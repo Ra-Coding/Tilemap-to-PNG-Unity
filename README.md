@@ -1,4 +1,7 @@
 # Tilemap to PNG Unity
+
+[![CI](https://github.com/Ra-Coding/unity-tilemap-to-png/actions/workflows/ci.yml/badge.svg)](https://github.com/Ra-Coding/unity-tilemap-to-png/actions/workflows/ci.yml)
+
  You can export your tilemaps as png in editor
 
 # How to use
@@ -8,9 +11,9 @@
  3- Set name and click export
  ```
  
-# Download
+# How to install
 
-Clone this repository or [download the .unitypackage](https://github.com/leocub58/Tilemap-to-PNG-Unity/raw/master/TilemapToPng.unitypackage)
+Install with the Unity Package Manager: https://github.com/Ra-Coding/unity-scriptableobject-variables.git#upm
 
 # IMPORTANT
 
