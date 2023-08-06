@@ -1,0 +1,15 @@
+{
+  "name": "de.ra-coding.tilemap-to-png",
+  "version": "1.0.0",
+  "displayName": "Tilemap to PNG",
+  "description": "This package includes Tilemap to PNG scripts.",
+  "unity": "2019.1",
+  "unityRelease": "0b5",
+  "documentationUrl": "https://github.com/Ra-Coding/unity-tilemap-to-png",
+  "changelogUrl": "https://github.com/Ra-Coding/unity-tilemap-to-png",
+  "licensesUrl": "https://github.com/Ra-Coding/unity-tilemap-to-png/blob/master/LICENSE",
+  "keywords": [
+    "Tilemap",
+    "PNG"
+  ]
+}
