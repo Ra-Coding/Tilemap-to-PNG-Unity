@@ -13,7 +13,7 @@
  
 # How to install
 
-Install with the Unity Package Manager: https://github.com/Ra-Coding/unity-scriptableobject-variables.git#upm
+Install with the Unity Package Manager: https://github.com/Ra-Coding/unity-tilemap-to-png.git#upm
 
 # IMPORTANT
 
