@@ -1,6 +1,6 @@
 # Tilemap to PNG Unity
 
-[![CI](https://github.com/Ra-Coding/unity-tilemap-to-png/actions/workflows/ci.yml/badge.svg)](https://github.com/Ra-Coding/unity-tilemap-to-png/actions/workflows/ci.yml)
+[![CI](https://github.com/Ra-Coding/unity-tilemap-to-png/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ra-Coding/unity-tilemap-to-png/actions/workflows/ci.yml)
 
  You can export your tilemaps as png in editor
 
